@@ -1,0 +1,37 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://src/ui/ColorPickerPopup.gd" type="Script" id=1]
+
+[node name="ColorPickerPopup" type="VBoxContainer"]
+margin_right = 110.0
+margin_bottom = 22.0
+rect_min_size = Vector2( 110, 20 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Button" type="Button" parent="."]
+margin_right = 110.0
+margin_bottom = 20.0
+toggle_mode = true
+text = "Alterar cor"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Popup" type="Popup" parent="."]
+margin_top = 24.0
+margin_right = 309.0
+margin_bottom = 494.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorPicker" type="ColorPicker" parent="Popup"]
+margin_left = 44.0
+margin_top = 44.0
+margin_right = 345.0
+margin_bottom = 506.0
+
+[connection signal="toggled" from="Button" to="." method="_on_Button_toggled"]

@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://src/Visualization.tscn" type="PackedScene" id=1]
+[ext_resource path="res://src/visualizations/QuickSortVisualization.gd" type="Script" id=2]
+
+[node name="QuickSortVisualization" instance=ExtResource( 1 )]
+script = ExtResource( 2 )
+
+[editable path="SettingsVBoxContainer/HBoxContainer/BaseColorPickerPopup"]
+[editable path="SettingsVBoxContainer/HBoxContainer/MultiplyColorPickerPopup"]
+[editable path="SettingsVBoxContainer/HBoxContainer/WallColorPickerPopup"]
+[editable path="SettingsVBoxContainer/HBoxContainer/MarkerPickerPopup"]
+[editable path="SettingsVBoxContainer/HBoxContainer/PivotPickerPopup"]

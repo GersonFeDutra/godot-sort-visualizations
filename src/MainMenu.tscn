@@ -1,0 +1,247 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://src/visualizations/QuickSortVisualization.tscn" type="PackedScene" id=1]
+[ext_resource path="res://src/visualizations/InsertionSortVisualization.tscn" type="PackedScene" id=2]
+[ext_resource path="res://src/MainMenu.gd" type="Script" id=3]
+
+[sub_resource type="Animation" id=1]
+resource_name = "resize_visualization_in"
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_size")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 2, 1 ),
+"update": 0,
+"values": [ Vector2( 460.8, 270 ), Vector2( 1024, 600 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath(".:rect_position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 2, 1 ),
+"update": 0,
+"values": [ Vector2( 0, 0 ), Vector2( -45, -165 ) ]
+}
+
+[sub_resource type="Animation" id=2]
+resource_name = "resize_visualization_out"
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_size")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 0.5, 1 ),
+"update": 0,
+"values": [ Vector2( 1024, 600 ), Vector2( 460.8, 270 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath(".:rect_position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 0.5, 1 ),
+"update": 0,
+"values": [ Vector2( -45, -165 ), Vector2( 0, 0 ) ]
+}
+tracks/2/type = "method"
+tracks/2/path = NodePath("../..")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 1 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [ "quick" ],
+"method": "_on_resize_visualization_out"
+} ]
+}
+
+[sub_resource type="Animation" id=3]
+resource_name = "resize_visualization_in"
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_size")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 2, 1 ),
+"update": 0,
+"values": [ Vector2( 460.8, 270 ), Vector2( 1024, 600 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath(".:rect_position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 2, 1 ),
+"update": 0,
+"values": [ Vector2( 475, 0 ), Vector2( -45, -165 ) ]
+}
+
+[sub_resource type="Animation" id=4]
+resource_name = "resize_visualization_out"
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_size")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 0.5, 1 ),
+"update": 0,
+"values": [ Vector2( 1024, 600 ), Vector2( 460.8, 270 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath(".:rect_position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 0.5, 1 ),
+"update": 0,
+"values": [ Vector2( -45, -165 ), Vector2( 475, 0 ) ]
+}
+tracks/2/type = "method"
+tracks/2/path = NodePath("../..")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 1 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [ "insertion" ],
+"method": "_on_resize_visualization_out"
+} ]
+}
+
+[node name="MainMenu" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -467.5
+margin_top = -135.0
+margin_right = 467.5
+margin_bottom = 135.0
+custom_constants/separation = 15
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="QuickSortVisualization" parent="HBoxContainer" instance=ExtResource( 1 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_right = 460.8
+margin_bottom = 270.0
+rect_min_size = Vector2( 460.8, 270 )
+animation_step_frequency = 0.5
+
+[node name="Label" type="Label" parent="HBoxContainer/QuickSortVisualization"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -77.1299
+margin_right = 75.8701
+margin_bottom = 20.0
+text = "Quck Sort Vizualization"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CheckButton" type="CheckButton" parent="HBoxContainer/QuickSortVisualization"]
+visible = false
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -217.0
+margin_top = -20.0
+text = "Alterar modo de tela inteira"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HBoxContainer/QuickSortVisualization"]
+anims/resize_visualization_in = SubResource( 1 )
+anims/resize_visualization_out = SubResource( 2 )
+
+[node name="InsertionSortVisualization" parent="HBoxContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 475.0
+margin_right = 935.8
+margin_bottom = 270.0
+rect_min_size = Vector2( 460.8, 270 )
+animation_step_frequency = 0.5
+
+[node name="Label" type="Label" parent="HBoxContainer/InsertionSortVisualization"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -88.4
+margin_right = 89.6
+margin_bottom = 20.0
+text = "Insertion Sort Vizualization"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CheckButton" type="CheckButton" parent="HBoxContainer/InsertionSortVisualization"]
+visible = false
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -217.0
+margin_top = -20.0
+text = "Alterar modo de tela inteira"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HBoxContainer/InsertionSortVisualization"]
+anims/resize_visualization_in = SubResource( 3 )
+anims/resize_visualization_out = SubResource( 4 )
+
+[connection signal="mouse_entered" from="HBoxContainer/QuickSortVisualization" to="." method="_on_QuickSortVisualization_mouse_entered"]
+[connection signal="mouse_exited" from="HBoxContainer/QuickSortVisualization" to="." method="_on_QuickSortVisualization_mouse_exited"]
+[connection signal="toggled" from="HBoxContainer/QuickSortVisualization/CheckButton" to="." method="_on_CheckButton_toggled" binds= [ "quick" ]]
+[connection signal="mouse_entered" from="HBoxContainer/InsertionSortVisualization" to="." method="_on_InsertionSortVisualization_mouse_entered"]
+[connection signal="mouse_exited" from="HBoxContainer/InsertionSortVisualization" to="." method="_on_InsertionSortVisualization_mouse_exited"]
+[connection signal="toggled" from="HBoxContainer/InsertionSortVisualization/CheckButton" to="." method="_on_CheckButton_toggled" binds= [ "insertion" ]]

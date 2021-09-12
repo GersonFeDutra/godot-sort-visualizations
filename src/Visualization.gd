@@ -10,21 +10,27 @@ enum IndexStates {
 	PIVOT,
 }
 
-export var invert_red: bool setget set_invert_red
-export var invert_green: bool setget set_invert_green
-export var invert_blue: bool = true setget set_invert_blue
-
+export var is_padding_enabled: bool = true setget set_is_padding_enabled
 export (int, 1, 9999) var array_size: int = 5 setget set_array_size
 export (float, .1, 1.0) var padding: float = .8 setget set_padding
-export (float, .001, 1.0) var animation_step_frequency: float = .07
+export (float, .001, 1.0) var animation_speed: float = \
+		.5 setget set_animation_speed
+export(float, EASE) var speed_easing: float = 0.2
 
-export var color_multiply: Color = Color(1.0, .5, 1.0) setget set_color_multiply
-export var color_base: Color = Color(1.0, 1.0, .9) setget set_color_base
-export var left_wall_color: Color = Color.slateblue setget set_left_wall_color
-export var current_marker_color: Color = Color.tomato setget set_current_marker_color
-export var pivot_color: Color = Color.aquamarine setget set_pivot_color
+export var colors: Dictionary = {
+	multiply = Color(1.0, .5, 1.0),
+	base = Color(1.0, 1.0, .9),
+	wall = Color.slateblue,
+	marker = Color.tomato,
+	pivot = Color.aquamarine,
+} setget set_colors
+export var invert_shades: Dictionary = {
+	red = false,
+	green = false,
+	blue = true,
+} setget set_invert_shades
 
-var is_padding_enabled: bool = true
+
 var is_animation_killed: bool
 var is_input_mode_external: bool setget set_is_input_mode_external
 
@@ -34,26 +40,23 @@ var rng := RandomNumberGenerator.new()
 
 onready var animation_seed: int = rng.seed
 onready var labels_container: VBoxContainer = $LabelsVBoxContainer
-onready var settings_container: VBoxContainer = $SettingsVBoxContainer
 onready var step_timer: Timer = $StepTimer
+onready var settings: VBoxContainer = $Settings
 
 
 func _ready() -> void:
 	rng.randomize()
-	$SettingsVBoxContainer/HBoxContainer/BaseColorPickerPopup/Popup/ColorPicker.color = color_base
-	$SettingsVBoxContainer/HBoxContainer/MultiplyColorPickerPopup/Popup/ColorPicker.color = \
-			color_multiply
-	$SettingsVBoxContainer/HBoxContainer/WallColorPickerPopup/Popup/ColorPicker.color = \
-			left_wall_color
-	$SettingsVBoxContainer/HBoxContainer/MarkerPickerPopup/Popup/ColorPicker.color = \
-			current_marker_color
-	$SettingsVBoxContainer/HBoxContainer/PivotPickerPopup/Popup/ColorPicker.color = pivot_color
-	$SettingsVBoxContainer/HBoxContainer2/RedCheckButton.pressed = invert_red
-	$SettingsVBoxContainer/HBoxContainer2/GreenCheckButton.pressed = invert_green
-	$SettingsVBoxContainer/HBoxContainer2/BlueCheckButton.pressed = invert_blue
-	$SettingsVBoxContainer/HBoxContainer2/SpeedHBoxContainer/HSlider.value = step_timer.wait_time
-	$SettingsVBoxContainer/HBoxContainer/SpinBox.value = array_size
-	$SettingsVBoxContainer/HBoxContainer/PaddingCheckButton.pressed = is_padding_enabled
+	
+	for key in colors.keys():
+		settings.color_pickers[key].color = colors[key]
+	
+	for key in invert_shades.keys():
+		settings.check_buttons[key].pressed = invert_shades[key]
+	
+	settings.speed_slider.value = animation_speed
+	step_timer.wait_time = 1.0 - ease(animation_speed, speed_easing)
+	settings.columns_spin_box.value = array_size
+	settings.padding_button.pressed = is_padding_enabled
 	start()
 
 
@@ -68,16 +71,16 @@ func _draw() -> void:
 		
 		match states_array[i]:
 			IndexStates.NORMAL:
-				color = color_multiply * Color(
-					_invert_float(invert_red, size_range * color_base.r),
-					_invert_float(invert_green, size_range * color_base.g),
-					_invert_float(invert_blue, size_range * color_base.b))
+				color = colors.multiply * Color(
+					_invert_float(invert_shades.red, size_range * colors.base.r),
+					_invert_float(invert_shades.green, size_range * colors.base.g),
+					_invert_float(invert_shades.blue, size_range * colors.base.b))
 			IndexStates.CURRENT:
-				color = current_marker_color
+				color = colors.marker
 			IndexStates.WALL:
-				color = left_wall_color
+				color = colors.wall
 			IndexStates.PIVOT:
-				color = pivot_color
+				color = colors.pivot
 		
 		draw_line(Vector2(current_x,  rect_size.y),
 				Vector2(current_x, rect_size.y - rect_size.y * size_range),
@@ -85,89 +88,30 @@ func _draw() -> void:
 		current_x += line_width
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	
 	if event.is_action_pressed("ui_accept"):
 		restart()
 		get_tree().set_input_as_handled()
 
 
-func _on_RedCheckButton_toggled(button_pressed: bool) -> void:
-	invert_red = button_pressed
-	update()
-
-
-func _on_BlueCheckButton_toggled(button_pressed: bool) -> void:
-	invert_blue = button_pressed
-	update()
-
-
-func _on_GreenCheckButton_toggled(button_pressed: bool) -> void:
-	invert_green = button_pressed
-	update()
-
-
-func _on_PaddingCheckButton_toggled(button_pressed: bool) -> void:
-	is_padding_enabled = button_pressed
-	update()
-
-
-func _on_HSlider_value_changed(value: float) -> void:
-	animation_step_frequency = value
-	step_timer.wait_time = animation_step_frequency
-
-
-func _on_ColorPicker_color_changed(color: Color) -> void:
-	self.color_base = color
-	update()
-
-
-func _on_ColorPickerMultiply_color_changed(color: Color) -> void:
-	self.color_multiply = color
-	update()
-
-
-func _on_WallColorPicker_color_changed(color: Color) -> void:
-	left_wall_color = color
-	update()
-
-
-func _on_MarkerColorPicker_color_changed(color: Color) -> void:
-	current_marker_color = color
-	update()
-
-
-func _on_PivotColorPicker_color_changed(color: Color) -> void:
-	pivot_color = color
-	update()
-
-
-func _on_Visualization_gui_input(event: InputEvent) -> void:
-	
-	if event.is_action_pressed("click"):
-		
-		if not is_input_mode_external:
-			labels_container.visible = not labels_container.visible
-			settings_container.visible = not settings_container.visible
-		
-		emit_signal("visualization_clicked")
-
-
 func start() -> void:
+	if Engine.is_editor_hint():
+		return
+	
 	var tmp: int = array_size
 	self.array_size = 0 # Limpa os valores anterioers do array.
 	rng.seed = animation_seed # Reseta o gerador de números.
 	self.array_size = tmp
+	var answer = _process_visualization()
 	
-	if not Engine.is_editor_hint():
-		var answer = _process_visualization()
-		
-		if answer is GDScriptFunctionState:
-			yield(answer, "completed")
-		
-		is_animation_killed = false
+	if answer is GDScriptFunctionState:
+		yield(answer, "completed")
+	
+	is_animation_killed = false
 
 
+# @virtual
 func _process_visualization():
 	pass
 
@@ -176,19 +120,30 @@ func restart():
 	is_animation_killed = true
 	step_timer.emit_signal("timeout")
 	
-	yield(get_tree().create_timer(animation_step_frequency), "timeout")
+	yield(get_tree().create_timer(1.0 - ease(animation_speed, speed_easing)), "timeout")
 	is_animation_killed = false
 	start()
-
 
 
 static func _invert_float(invert: bool, n: float) -> float:
 	return 1.0 - n if invert else n
 
 
+func _update_padding_button() -> void:
+	settings.padding_button.pressed = is_padding_enabled
+
+
 func set_is_input_mode_external(value: bool) -> void:
 	is_input_mode_external = value
-	set_process_unhandled_input(not value)
+	set_process_input(not value)
+
+
+func set_is_padding_enabled(value: bool) -> void:
+	is_padding_enabled = value
+	call_deferred("update")
+	
+	if Engine.is_editor_hint():
+		call_deferred("_update_padding_button")
 
 
 func set_array_size(value: int) -> void:
@@ -209,55 +164,83 @@ func set_array_size(value: int) -> void:
 
 func set_padding(value: float) -> void:
 	padding = value
-	update()
+	call_deferred("update")
 
 
-func set_color_multiply(value: Color) -> void:
-	color_multiply = value
-	update()
+func _update_speed() -> void:
+	settings.speed_slider.value = animation_speed
+	step_timer.wait_time = 1.0 - ease(animation_speed, speed_easing)
 
 
-func set_color_base(value: Color) -> void:
-	color_base = value
-	update()
+func set_animation_speed(value: float) -> void:
+	animation_speed = value
+	call_deferred("_update_speed")
 
 
-func set_left_wall_color(value: Color) -> void:
-	left_wall_color = value
-	update()
+func _update_colors() -> void:
+
+	for key in colors.keys():
+		settings.color_pickers[key].color = colors[key]
 
 
-func set_current_marker_color(value: Color) -> void:
-	current_marker_color = value
-	update()
-
-
-func set_pivot_color(value: Color) -> void:
-	pivot_color = value
-	update()
-
-
-func set_invert_red(value) -> void:
-	invert_red = value
-	update()
-
-
-func set_invert_green(value) -> void:
-	invert_green = value
-	update()
-
-
-func set_invert_blue(value) -> void:
-	invert_blue = value
-	update()
-
-
-func _on_SpinBox_value_changed(value: float) -> void:
+func set_colors(value: Dictionary) -> void:
+	colors = value
+	call_deferred("update")
 	
+	if Engine.is_editor_hint():
+		call_deferred("_update_colors")
+
+
+func _update_buttons() -> void:
+
+	for key in invert_shades.keys():
+		settings.check_buttons[key].pressed = invert_shades[key]
+
+
+func set_invert_shades(value: Dictionary) -> void:
+	invert_shades = value
+	call_deferred("update")
+	
+	if Engine.is_editor_hint():
+		call_deferred("_update_buttons")
+
+
+func _on_Visualization_gui_input(event: InputEvent) -> void:
+	
+	if event.is_action_pressed("click"):
+		
+		if not is_input_mode_external:
+			labels_container.visible = not labels_container.visible
+			settings.visible = not settings.visible
+		
+		emit_signal("visualization_clicked")
+
+
+func _on_Settings_color_changed(slot: String, color: Color) -> void:
+	colors[slot] = color
+	update()
+
+
+func _on_Settings_button_toggled(slot: String, was_pressed: bool) -> void:
+	invert_shades[slot] = was_pressed
+	update()
+
+
+func _on_Settings_columns_changed(to: float) -> void:
 	is_animation_killed = true
 	step_timer.emit_signal("timeout")
 	
-	yield(get_tree().create_timer(animation_step_frequency), "timeout")
+	yield(get_tree().create_timer(animation_speed), "timeout")
 	is_animation_killed = false
-	array_size = value as int
+	array_size = to as int
 	start()
+
+
+func _on_Settings_speed_changed(to: float) -> void:
+	animation_speed = to
+	step_timer.wait_time = 1.0 - ease(animation_speed, speed_easing)
+
+
+func _on_Settings_use_padding_toggled(was_enabled: bool) -> void:
+	is_padding_enabled = was_enabled
+	update()

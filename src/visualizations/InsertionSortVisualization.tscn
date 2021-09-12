@@ -6,8 +6,5 @@
 [node name="InsertionSortVisualization" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
 
-[editable path="SettingsVBoxContainer/HBoxContainer/BaseColorPickerPopup"]
-[editable path="SettingsVBoxContainer/HBoxContainer/MultiplyColorPickerPopup"]
-[editable path="SettingsVBoxContainer/HBoxContainer/WallColorPickerPopup"]
-[editable path="SettingsVBoxContainer/HBoxContainer/MarkerPickerPopup"]
-[editable path="SettingsVBoxContainer/HBoxContainer/PivotPickerPopup"]
+[node name="StepTimer" parent="." index="2"]
+wait_time = 0.03125

@@ -8,8 +8,26 @@
 
 config_version=4
 
-_global_script_classes=[  ]
+_global_script_classes=[ {
+"base": "ColorPickerButton",
+"class": "CustomColorPickerButton",
+"language": "GDScript",
+"path": "res://src/lib/utils/CustomColorPickerButton.gd"
+}, {
+"base": "Reference",
+"class": "Tools",
+"language": "GDScript",
+"path": "res://src/lib/utils/Tools.gd"
+}, {
+"base": "Node2D",
+"class": "VisualTools",
+"language": "GDScript",
+"path": "res://src/lib/utils/VisualTools.gd"
+} ]
 _global_script_class_icons={
+"CustomColorPickerButton": "",
+"Tools": "",
+"VisualTools": ""
 }
 
 [application]

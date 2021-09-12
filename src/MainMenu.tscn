@@ -168,7 +168,7 @@ anchor_bottom = 0.0
 margin_right = 460.8
 margin_bottom = 270.0
 rect_min_size = Vector2( 460.8, 270 )
-animation_step_frequency = 0.5
+mouse_filter = 1
 
 [node name="Label" type="Label" parent="HBoxContainer/QuickSortVisualization"]
 anchor_left = 0.5
@@ -207,7 +207,7 @@ margin_left = 475.0
 margin_right = 935.8
 margin_bottom = 270.0
 rect_min_size = Vector2( 460.8, 270 )
-animation_step_frequency = 0.5
+mouse_filter = 1
 
 [node name="Label" type="Label" parent="HBoxContainer/InsertionSortVisualization"]
 anchor_left = 0.5

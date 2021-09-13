@@ -5,6 +5,3 @@
 
 [node name="QuickSortVisualization" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
-
-[node name="StepTimer" parent="." index="2"]
-wait_time = 0.03125

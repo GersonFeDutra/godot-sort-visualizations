@@ -2,6 +2,7 @@ tool
 extends Control
 
 signal visualization_clicked
+signal colors_changed
 
 enum IndexStates {
 	NORMAL,
@@ -30,7 +31,6 @@ export var invert_shades: Dictionary = {
 	blue = true,
 } setget set_invert_shades
 
-
 var is_animation_killed: bool
 var is_input_mode_external: bool setget set_is_input_mode_external
 
@@ -39,7 +39,7 @@ var states_array: PoolIntArray
 var rng := RandomNumberGenerator.new()
 
 onready var animation_seed: int = rng.seed
-onready var labels_container: VBoxContainer = $LabelsVBoxContainer
+onready var labels_container: VBoxContainer = $BottomBar
 onready var step_timer: Timer = $StepTimer
 onready var settings: VBoxContainer = $Settings
 
@@ -71,10 +71,10 @@ func _draw() -> void:
 		
 		match states_array[i]:
 			IndexStates.NORMAL:
-				color = colors.multiply * Color(
-					_invert_float(invert_shades.red, size_range * colors.base.r),
-					_invert_float(invert_shades.green, size_range * colors.base.g),
-					_invert_float(invert_shades.blue, size_range * colors.base.b))
+				color = colors.base.linear_interpolate(colors.multiply, size_range)
+				color.r = _invert_float(invert_shades.red, color.r)
+				color.g = _invert_float(invert_shades.green, color.g)
+				color.b = _invert_float(invert_shades.blue, color.b)
 			IndexStates.CURRENT:
 				color = colors.marker
 			IndexStates.WALL:
@@ -123,6 +123,11 @@ func restart():
 	yield(get_tree().create_timer(1.0 - ease(animation_speed, speed_easing)), "timeout")
 	is_animation_killed = false
 	start()
+
+
+func toggle_controls_visibility() -> void:
+	labels_container.visible = not labels_container.visible
+	settings.visible = not settings.visible
 
 
 static func _invert_float(invert: bool, n: float) -> float:
@@ -185,6 +190,7 @@ func _update_colors() -> void:
 
 func set_colors(value: Dictionary) -> void:
 	colors = value
+	emit_signal("colors_changed")
 	call_deferred("update")
 	
 	if Engine.is_editor_hint():
@@ -199,6 +205,7 @@ func _update_buttons() -> void:
 
 func set_invert_shades(value: Dictionary) -> void:
 	invert_shades = value
+	emit_signal("colors_changed")
 	call_deferred("update")
 	
 	if Engine.is_editor_hint():
@@ -209,11 +216,11 @@ func _on_Visualization_gui_input(event: InputEvent) -> void:
 	
 	if event.is_action_pressed("click"):
 		
-		if not is_input_mode_external:
-			labels_container.visible = not labels_container.visible
-			settings.visible = not settings.visible
 		
-		emit_signal("visualization_clicked")
+		if is_input_mode_external:
+			emit_signal("visualization_clicked")
+		else:
+			toggle_controls_visibility()
 
 
 func _on_Settings_color_changed(slot: String, color: Color) -> void:
@@ -238,7 +245,7 @@ func _on_Settings_columns_changed(to: float) -> void:
 
 func _on_Settings_speed_changed(to: float) -> void:
 	animation_speed = to
-	step_timer.wait_time = 1.0 - ease(animation_speed, speed_easing)
+	step_timer.wait_time = max(1.0 - ease(animation_speed, speed_easing), 0.0001)
 
 
 func _on_Settings_use_padding_toggled(was_enabled: bool) -> void:

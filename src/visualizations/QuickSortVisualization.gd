@@ -5,7 +5,6 @@ extends "res://src/Visualization.gd"
 func _process_visualization():
 	quick_sort(0, array_size - 1)
 
-
 func quick_sort(start: int, end: int):
 	
 	if start < end:
@@ -60,6 +59,10 @@ func partition(start: int, end: int) -> int:
 		states_array[left_wall] = IndexStates.NORMAL
 	
 	yield(swap(left_wall, end), "completed")
+	
+	if is_animation_killed:
+		return
+	
 	states_array[end] = IndexStates.NORMAL
 	
 	return left_wall

@@ -37,6 +37,7 @@ var is_input_mode_external: bool setget set_is_input_mode_external
 var array: PoolIntArray
 var states_array: PoolIntArray
 var rng := RandomNumberGenerator.new()
+var execution_state: GDScriptFunctionState = null
 
 onready var animation_seed: int = rng.seed
 onready var labels_container: VBoxContainer = $BottomBar
@@ -103,24 +104,17 @@ func start() -> void:
 	self.array_size = 0 # Limpa os valores anterioers do array.
 	rng.seed = animation_seed # Reseta o gerador de números.
 	self.array_size = tmp
-	var answer = _process_visualization()
-	
-	if answer is GDScriptFunctionState:
-		yield(answer, "completed")
-	
-	is_animation_killed = false
+	execution_state = _process_visualization()
 
 
 # @virtual
-func _process_visualization():
-	pass
+func _process_visualization() -> GDScriptFunctionState:
+	return null
 
 
 func restart():
 	is_animation_killed = true
 	step_timer.emit_signal("timeout")
-	
-	yield(get_tree().create_timer(1.0 - ease(animation_speed, speed_easing)), "timeout")
 	is_animation_killed = false
 	start()
 
@@ -234,13 +228,8 @@ func _on_Settings_button_toggled(slot: String, was_pressed: bool) -> void:
 
 
 func _on_Settings_columns_changed(to: float) -> void:
-	is_animation_killed = true
-	step_timer.emit_signal("timeout")
-	
-	yield(get_tree().create_timer(animation_speed), "timeout")
-	is_animation_killed = false
-	array_size = to as int
-	start()
+	self.array_size = to as int
+	restart()
 
 
 func _on_Settings_speed_changed(to: float) -> void:

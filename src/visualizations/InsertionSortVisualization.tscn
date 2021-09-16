@@ -5,6 +5,15 @@
 
 [node name="InsertionSortVisualization" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
-
-[node name="StepTimer" parent="." index="2"]
-wait_time = 0.03125
+colors = {
+"base": Color( 1, 1, 0.901961, 1 ),
+"marker": Color( 1, 0.39, 0.28, 1 ),
+"multiply": Color( 0.419608, 0.34902, 0.8, 1 ),
+"pivot": Color( 0.5, 1, 0.83, 1 ),
+"wall": Color( 1, 0.976471, 0.364706, 1 )
+}
+invert_shades = {
+"blue": false,
+"green": false,
+"red": false
+}

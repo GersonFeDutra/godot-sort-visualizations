@@ -2,14 +2,11 @@ tool
 extends "res://src/Visualization.gd"
 
 
-func _process_visualization():
-	var answer = insertion_sort(array_size)
-	
-	if answer is GDScriptFunctionState:
-		yield(answer, "completed")
+func _process_visualization() -> GDScriptFunctionState:
+	return insertion_sort(array_size)
 
 
-func insertion_sort(size: int):
+func insertion_sort(size: int) -> GDScriptFunctionState:
 	
 	for i in size:
 		var j: int = i
@@ -26,7 +23,7 @@ func insertion_sort(size: int):
 			yield(step_timer, "timeout")
 			
 			if is_animation_killed:
-				return
+				return null
 			
 			update()
 			states_array[j] = IndexStates.NORMAL
@@ -34,3 +31,5 @@ func insertion_sort(size: int):
 			j -= 1
 		
 		states_array[i] = IndexStates.NORMAL
+	
+	return null

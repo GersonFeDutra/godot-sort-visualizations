@@ -1,14 +1,18 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=22 format=2]
 
 [ext_resource path="res://src/visualizations/QuickSortVisualization.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/visualizations/InsertionSortVisualization.tscn" type="PackedScene" id=2]
+[ext_resource path="res://src/lib/screen_recorder/ScreenRecorder.gd" type="Script" id=3]
 [ext_resource path="res://assets/sprites/expand.png" type="Texture" id=4]
 [ext_resource path="res://src/lib/resources/VizualizationData.gd" type="Script" id=5]
+[ext_resource path="res://src/MainMenu.gd" type="Script" id=6]
 
 [sub_resource type="GDScript" id=1]
 script/source = "tool
 extends HBoxContainer
 
+# warning-ignore:unused_signal
+signal visualization_finished(wich)
 signal full_mode_cancelled
 
 const VizualizationData = preload(\"res://src/lib/resources/VizualizationData.gd\")
@@ -19,8 +23,13 @@ onready var insertion_sort: Control = $InsertionSort
 
 
 func _ready() -> void:
-	quick_sort.toggle_controls_visibility()
-	insertion_sort.toggle_controls_visibility()
+	var visualizations: Array = [quick_sort, insertion_sort]
+	
+	for i in visualizations.size():
+		visualizations[i].toggle_controls_visibility()
+		Tools.resolve_connection(visualizations[i], \"visualization_finished\", self, \"emit_signal\",
+				[\"visualization_finished\", i + 1])
+	
 	set_process_input(false)
 	
 	if Engine.is_editor_hint():
@@ -43,6 +52,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		quick_sort.restart()
 		insertion_sort.restart()
 		get_tree().set_input_as_handled()
+
+
+func restart() -> void:
+	quick_sort.restart()
+	insertion_sort.restart()
 
 
 func highlight(node: Control) -> void:
@@ -298,14 +312,76 @@ func _on_Tween_tween_completed(_object: Object, _key: NodePath) -> void:
 		emit_signal(\"resized_in\")
 "
 
+[sub_resource type="GDScript" id=13]
+script/source = "extends CenterContainer
+
+signal finish_mode_changed(to)
+
+enum FinishMode {
+	NONE = 0,
+	QUICK_SORT = 1,
+	INSERTION_SORT = 2,
+}
+
+onready var animation_player: AnimationPlayer = $AnimationPlayer
+
+
+func _on_BottomBar_mouse_entered() -> void:
+	animation_player.stop()
+	modulate.a = 1.0
+
+
+func _on_BottomBar_mouse_exited() -> void:
+	animation_player.play(\"fade_out\")
+
+
+func _on_QSButton_toggled(button_pressed: bool) -> void:
+	emit_signal(\"finish_mode_changed\", FinishMode.QUICK_SORT if button_pressed else FinishMode.NONE)
+
+
+func _on_ISButton_toggled(button_pressed: bool) -> void:
+	emit_signal(
+			\"finish_mode_changed\", FinishMode.INSERTION_SORT if button_pressed else FinishMode.NONE)
+"
+
+[sub_resource type="ButtonGroup" id=14]
+
+[sub_resource type="Animation" id=15]
+length = 3.0
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate:a")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1, 3 ),
+"transitions": PoolRealArray( 1, 2, 1 ),
+"update": 0,
+"values": [ 1.0, 1.0, 0.0 ]
+}
+
 [node name="MainMenu" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 6 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ViewportContainer" type="ViewportContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Visualizations" type="HBoxContainer" parent="."]
+[node name="Viewport" type="Viewport" parent="ViewportContainer"]
+size = Vector2( 1024, 600 )
+handle_input_locally = false
+render_target_update_mode = 3
+
+[node name="Visualizations" type="HBoxContainer" parent="ViewportContainer/Viewport"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -322,7 +398,7 @@ __meta__ = {
 quick_sort_refs = SubResource( 2 )
 insertion_sort_refs = SubResource( 3 )
 
-[node name="QuickSort" parent="Visualizations" instance=ExtResource( 1 )]
+[node name="QuickSort" parent="ViewportContainer/Viewport/Visualizations" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_left = 0.0
@@ -344,7 +420,7 @@ invert_shades = {
 "red": false
 }
 
-[node name="Label" type="Label" parent="Visualizations/QuickSort"]
+[node name="Label" type="Label" parent="ViewportContainer/Viewport/Visualizations/QuickSort"]
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
@@ -357,7 +433,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Anchor" type="Control" parent="Visualizations/QuickSort"]
+[node name="Anchor" type="Control" parent="ViewportContainer/Viewport/Visualizations/QuickSort"]
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -370,7 +446,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="TextureRect" type="TextureRect" parent="Visualizations/QuickSort/Anchor"]
+[node name="TextureRect" type="TextureRect" parent="ViewportContainer/Viewport/Visualizations/QuickSort/Anchor"]
 material = SubResource( 5 )
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -380,7 +456,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="FullModeLabel" type="Label" parent="Visualizations/QuickSort"]
+[node name="FullModeLabel" type="Label" parent="ViewportContainer/Viewport/Visualizations/QuickSort"]
 visible = false
 modulate = Color( 1, 1, 1, 0 )
 anchor_left = 0.5
@@ -396,15 +472,15 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Visualizations/QuickSort/FullModeLabel"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="ViewportContainer/Viewport/Visualizations/QuickSort/FullModeLabel"]
 anims/fade_out = SubResource( 6 )
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Visualizations/QuickSort"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="ViewportContainer/Viewport/Visualizations/QuickSort"]
 anims/resize_visualization_in = SubResource( 7 )
 anims/resize_visualization_out = SubResource( 8 )
 script = SubResource( 9 )
 
-[node name="InsertionSort" parent="Visualizations" instance=ExtResource( 2 )]
+[node name="InsertionSort" parent="ViewportContainer/Viewport/Visualizations" instance=ExtResource( 2 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_left = 475.0
@@ -426,7 +502,7 @@ invert_shades = {
 "red": false
 }
 
-[node name="Label" type="Label" parent="Visualizations/InsertionSort"]
+[node name="Label" type="Label" parent="ViewportContainer/Viewport/Visualizations/InsertionSort"]
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
@@ -439,7 +515,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Anchor2" type="Control" parent="Visualizations/InsertionSort"]
+[node name="Anchor2" type="Control" parent="ViewportContainer/Viewport/Visualizations/InsertionSort"]
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -451,7 +527,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="TextureRect" type="TextureRect" parent="Visualizations/InsertionSort/Anchor2"]
+[node name="TextureRect" type="TextureRect" parent="ViewportContainer/Viewport/Visualizations/InsertionSort/Anchor2"]
 material = SubResource( 10 )
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -461,7 +537,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="FullModeLabel2" type="Label" parent="Visualizations/InsertionSort"]
+[node name="FullModeLabel2" type="Label" parent="ViewportContainer/Viewport/Visualizations/InsertionSort"]
 visible = false
 modulate = Color( 1, 1, 1, 0 )
 anchor_left = 0.5
@@ -477,11 +553,105 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Visualizations/InsertionSort/FullModeLabel2"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="ViewportContainer/Viewport/Visualizations/InsertionSort/FullModeLabel2"]
 anims/fade_out = SubResource( 11 )
 
-[node name="Tween" type="Tween" parent="Visualizations/InsertionSort"]
+[node name="Tween" type="Tween" parent="ViewportContainer/Viewport/Visualizations/InsertionSort"]
 script = SubResource( 12 )
 target_path = NodePath("..")
 
-[connection signal="tween_completed" from="Visualizations/InsertionSort/Tween" to="Visualizations/InsertionSort/Tween" method="_on_Tween_tween_completed"]
+[node name="BottomBar" type="CenterContainer" parent="."]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -62.0
+script = SubResource( 13 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MarginContainer" type="MarginContainer" parent="BottomBar"]
+margin_left = 60.0
+margin_right = 964.0
+margin_bottom = 62.0
+mouse_filter = 2
+custom_constants/margin_right = 6
+custom_constants/margin_top = 6
+custom_constants/margin_left = 6
+custom_constants/margin_bottom = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="BottomBar/MarginContainer"]
+margin_left = 6.0
+margin_top = 6.0
+margin_right = 898.0
+margin_bottom = 56.0
+mouse_filter = 2
+
+[node name="Recordlabel" type="RichTextLabel" parent="BottomBar/MarginContainer/HBoxContainer"]
+margin_right = 500.0
+margin_bottom = 50.0
+rect_min_size = Vector2( 500, 50 )
+mouse_filter = 2
+bbcode_enabled = true
+bbcode_text = "[center]Press [color=#ffebcc]r[/color] to start recording (the animation will restart).
+Press [color=#ffebcc]R (shift+r)[/color] to start normally.[/center]"
+text = "Press r to start recording (the animation will restart).
+Press R (shift+r) to start normally."
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="BottomBar/MarginContainer/HBoxContainer"]
+margin_left = 504.0
+margin_top = 18.0
+margin_right = 579.0
+margin_bottom = 32.0
+text = "Finish after:"
+
+[node name="QSButton" type="CheckButton" parent="BottomBar/MarginContainer/HBoxContainer"]
+margin_left = 583.0
+margin_right = 725.0
+margin_bottom = 50.0
+mouse_filter = 1
+group = SubResource( 14 )
+text = "QuickSort"
+
+[node name="ISButton" type="CheckButton" parent="BottomBar/MarginContainer/HBoxContainer"]
+margin_left = 729.0
+margin_right = 892.0
+margin_bottom = 50.0
+mouse_filter = 1
+group = SubResource( 14 )
+text = "InsertionSort"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="BottomBar"]
+autoplay = "fade_out"
+anims/fade_out = SubResource( 15 )
+
+[node name="WaitLabel" type="Label" parent="."]
+visible = false
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -60.5
+margin_top = 53.5143
+margin_right = 63.5
+margin_bottom = 84.5143
+text = "Processando vídeo!
+Aguarde..."
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ScreenRecorder" type="Node" parent="."]
+script = ExtResource( 3 )
+
+[connection signal="visualization_finished" from="ViewportContainer/Viewport/Visualizations" to="." method="_on_Visualizations_visualization_finished"]
+[connection signal="tween_completed" from="ViewportContainer/Viewport/Visualizations/InsertionSort/Tween" to="ViewportContainer/Viewport/Visualizations/InsertionSort/Tween" method="_on_Tween_tween_completed"]
+[connection signal="finish_mode_changed" from="BottomBar" to="." method="_on_BottomBar_finish_mode_changed"]
+[connection signal="mouse_entered" from="BottomBar" to="BottomBar" method="_on_BottomBar_mouse_entered"]
+[connection signal="mouse_exited" from="BottomBar" to="BottomBar" method="_on_BottomBar_mouse_exited"]
+[connection signal="toggled" from="BottomBar/MarginContainer/HBoxContainer/QSButton" to="BottomBar" method="_on_QSButton_toggled"]
+[connection signal="toggled" from="BottomBar/MarginContainer/HBoxContainer/ISButton" to="BottomBar" method="_on_ISButton_toggled"]
+[connection signal="process_completed" from="ScreenRecorder" to="." method="_on_ScreenRecorder_process_completed"]

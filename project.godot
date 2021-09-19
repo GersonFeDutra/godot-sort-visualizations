@@ -14,6 +14,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://src/lib/utils/CustomColorPickerButton.gd"
 }, {
+"base": "Node",
+"class": "ScreenRecorder",
+"language": "GDScript",
+"path": "res://src/lib/screen_recorder/ScreenRecorder.gd"
+}, {
 "base": "Reference",
 "class": "Tools",
 "language": "GDScript",
@@ -26,6 +31,7 @@ _global_script_classes=[ {
 } ]
 _global_script_class_icons={
 "CustomColorPickerButton": "",
+"ScreenRecorder": "",
 "Tools": "",
 "VisualTools": ""
 }
@@ -45,6 +51,10 @@ Ui="*res://src/autoload/UI.tscn"
 window/size/resizable=false
 window/stretch/mode="2d"
 window/stretch/aspect="keep"
+
+[editor_plugins]
+
+enabled=PoolStringArray(  )
 
 [input]
 

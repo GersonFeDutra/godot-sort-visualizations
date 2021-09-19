@@ -2,8 +2,15 @@ tool
 extends "res://src/Visualization.gd"
 
 
-func _process_visualization() -> GDScriptFunctionState:
-	return insertion_sort(array_size)
+func _process_visualization():
+	var state = insertion_sort(array_size)
+	
+	while state is GDScriptFunctionState and state.is_valid():
+		step_timer.start()
+		yield(step_timer, "timeout")
+		state = state.resume()
+	
+	emit_signal("visualization_finished")
 
 
 func insertion_sort(size: int) -> GDScriptFunctionState:
@@ -19,8 +26,7 @@ func insertion_sort(size: int) -> GDScriptFunctionState:
 			
 			states_array[j] = IndexStates.PIVOT
 			states_array[j - 1] = IndexStates.WALL
-			step_timer.start()
-			yield(step_timer, "timeout")
+			yield()
 			
 			if is_animation_killed:
 				return null

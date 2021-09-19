@@ -1,6 +1,7 @@
 tool
 extends Control
 
+signal visualization_finished
 signal visualization_clicked
 signal colors_changed
 
@@ -104,12 +105,12 @@ func start() -> void:
 	self.array_size = 0 # Limpa os valores anterioers do array.
 	rng.seed = animation_seed # Reseta o gerador de números.
 	self.array_size = tmp
-	execution_state = _process_visualization()
+	_process_visualization()
 
 
 # @virtual
-func _process_visualization() -> GDScriptFunctionState:
-	return null
+func _process_visualization():
+	return
 
 
 func restart():
@@ -218,7 +219,7 @@ func _on_Visualization_gui_input(event: InputEvent) -> void:
 
 
 func _on_Settings_color_changed(slot: String, color: Color) -> void:
-	colors[slot] = color
+	self.colors[slot] = color
 	update()
 
 

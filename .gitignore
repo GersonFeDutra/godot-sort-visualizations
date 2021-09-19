@@ -18,3 +18,6 @@ data_*/
 
 # Don't include those pesky .DS_Store files on macOS
 .DS_Store
+
+#IDE
+.vscode/
